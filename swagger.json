@@ -1,14 +1,14 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Takeitnow API Documentation",
+        "description": "University Megazine API Documentation",
         "version": "1.0.0",
-        "title": "Takeitnow API",
+        "title": "Megazine API",
         "contact": {
             "email": "minthukyaw454@gmail.com"
         },
         "license": {
-            "name": "Takeitnow",
+            "name": "Megazine",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         }
     },
@@ -59,7 +59,7 @@
                                 "task" : {
                                     "type": "object",
                                     "$ref": "#/definitions/Task"
-                                } 
+                                }
                             }
                         }
                     }
@@ -107,7 +107,7 @@
                                 "task" : {
                                     "type": "object",
                                     "$ref": "#/definitions/Task"
-                                } 
+                                }
                             }
                         }
                     }
@@ -164,7 +164,7 @@
                 }
             }
         }
-    }, 
+    },
     "definitions": {
         "todosResponse": {
             "type": "object",
