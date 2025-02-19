@@ -6,159 +6,119 @@
         "title": "Megazine API",
         "contact": {
             "email": "minthukyaw454@gmail.com"
-        },
-        "license": {
-            "name": "Megazine",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         }
     },
     "schemes": ["https"],
     "host": "localhost:3080",
     "basePath": "/api",
-    "paths" : {
-        "/todos" : {
-            "get" : {
-                "summary" : "Get all the tasks",
-                "description": "Get all the tasks",
-                "produces": ["application/json"],
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/todosResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid status value",
-                        "schema": {
-                            "$ref": "#/definitions/InvalidResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/todo" : {
-            "post" : {
-                "summary" : "Save the task",
-                "description": "Save the task",
-                "produces": ["application/json"],
+    "paths": {
+        "/createUser": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Create a new user",
+                "description": "Registers a new user in the system.",
                 "consumes": ["application/json"],
+                "produces": ["application/json"],
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "task object",
+                        "description": "User object that needs to be created",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "task" : {
-                                    "type": "object",
-                                    "$ref": "#/definitions/Task"
-                                }
-                            }
+                            "$ref": "#/definitions/User"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "successful operation",
+                        "description": "User created successfully",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/todosResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid status value",
-                        "schema": {
-                            "$ref": "#/definitions/InvalidResponse"
+                            "$ref": "#/definitions/UserResponse"
                         }
                     }
                 }
             }
         },
-        "/todos/{id}" : {
-            "put" : {
-                "summary" : "Update the tasks",
-                "description": "Update the tasks",
+        "/login": {
+            "post": {
+                "tags": ["User"],
+                "summary": "User login",
+                "description": "Authenticates a user and returns a token.",
+                "consumes": ["application/json"],
                 "produces": ["application/json"],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "task id that needs to be deleted",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
                         "in": "body",
                         "name": "body",
-                        "description": "task object",
+                        "description": "User login credentials",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "task" : {
-                                    "type": "object",
-                                    "$ref": "#/definitions/Task"
-                                }
-                            }
+                            "$ref": "#/definitions/LoginRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "successful operation",
+                        "description": "User authenticated successfully",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/todosResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid status value",
-                        "schema": {
-                            "$ref": "#/definitions/InvalidResponse"
+                            "$ref": "#/definitions/LoginResponse"
                         }
                     }
                 }
             }
         },
-        "/todo/{id}" : {
-            "delete" : {
-                "summary" : "Delete the task",
-                "description": "Delete the task",
+        "/sendVerificationMail": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Send verification email",
+                "description": "Sends a verification email to the user.",
+                "consumes": ["application/json"],
                 "produces": ["application/json"],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "task id that needs to be deleted",
+                        "in": "body",
+                        "name": "body",
+                        "description": "User ID to send verification email",
                         "required": true,
-                        "type": "string"
+                        "schema": {
+                            "$ref": "#/definitions/VerificationRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "successful operation",
+                        "description": "Email sent successfully",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/todosResponse"
-                            }
+                            "$ref": "#/definitions/VerificationResponse"
                         }
-                    },
-                    "400": {
-                        "description": "Invalid status value",
+                    }
+                }
+            }
+        },
+        "/verifyUser": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Verify user",
+                "description": "Verifies a user's email with an authentication code.",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "User verification data",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/InvalidResponse"
+                            "$ref": "#/definitions/VerifyUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User verified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/VerifyUserResponse"
                         }
                     }
                 }
@@ -166,48 +126,104 @@
         }
     },
     "definitions": {
-        "todosResponse": {
+        "User": {
             "type": "object",
             "properties": {
-                "id": {
-                     "type": "integer"
-                },
-                "task": {
-                    "type": "string"
-                },
-                "assignee": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
+                "username": { "type": "string" },
+                "password": { "type": "string" },
+                "role": { "type": "integer" },
+                "email": { "type": "string" },
+                "phone": { "type": "string" },
+                "first_name": { "type": "string" },
+                "last_name": { "type": "string" }
+            }
+        },
+        "UserResponse": {
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "result": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "$ref": "#/definitions/UserDetails"
+                        },
+                        "auth": {
+                            "$ref": "#/definitions/AuthDetails"
+                        }
+                    }
                 }
             }
         },
-        "Task": {
+        "LoginRequest": {
             "type": "object",
             "properties": {
-                "task": {
-                    "type": "string"
-                },
-                "assignee": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
+                "user_name": { "type": "string" },
+                "password": { "type": "string" }
+            }
+        },
+        "LoginResponse": {
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "token": { "type": "string" },
+                "result": {
+                    "$ref": "#/definitions/UserDetails"
                 }
             }
         },
-        "InvalidResponse": {
+        "VerificationRequest": {
             "type": "object",
             "properties": {
-                "statusCode": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
+                "user_id": { "type": "integer" }
             }
-
+        },
+        "VerificationResponse": {
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "result": { "type": "object" }
+            }
+        },
+        "VerifyUserRequest": {
+            "type": "object",
+            "properties": {
+                "user_id": { "type": "integer" },
+                "auth_code": { "type": "integer" }
+            }
+        },
+        "VerifyUserResponse": {
+            "type": "object",
+            "properties": {
+                "status": { "type": "integer" },
+                "message": { "type": "string" }
+            }
+        },
+        "UserDetails": {
+            "type": "object",
+            "properties": {
+                "user_id": { "type": "integer" },
+                "user_name": { "type": "string" },
+                "first_name": { "type": "string" },
+                "last_name": { "type": "string" },
+                "email": { "type": "string" },
+                "phone": { "type": "string" },
+                "role": { "type": "integer" },
+                "auth_id": { "type": "integer" },
+                "status": { "type": "boolean" },
+                "createdAt": { "type": "string" },
+                "updatedAt": { "type": "string" }
+            }
+        },
+        "AuthDetails": {
+            "type": "object",
+            "properties": {
+                "auth_id": { "type": "integer" },
+                "auth_code": { "type": "integer" },
+                "is_verified": { "type": "boolean" },
+                "createdAt": { "type": "string" },
+                "updatedAt": { "type": "string" }
+            }
         }
     }
 }
