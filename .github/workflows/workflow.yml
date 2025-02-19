@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_SSH_PASSWORD }}
           script: |
-            cd /home/ubuntu/dev/bee-express-admin-backend
+            cd /home/ubuntu/dev/kmd-megazine-backend
             git fetch origin
             git checkout ${{ github.ref_name }}
             git pull origin ${{ github.ref_name }}
