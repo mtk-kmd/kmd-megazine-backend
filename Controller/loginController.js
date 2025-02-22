@@ -24,9 +24,11 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: "Authentication failed" });
         }
 
-        // Check if the user's authentication is verified
-        if (!user.auth || !user.auth.is_verified) {
-            return res.status(401).json({ message: "User is not verified" });
+        if (user.role === 3) {
+            // Check if the user's authentication is verified
+            if (!user.auth || !user.auth.is_verified) {
+                return res.status(401).json({ message: "User is not verified" });
+            }
         }
 
         const token = jwt.sign(
