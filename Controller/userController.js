@@ -75,7 +75,6 @@ exports.createUser = async (req, res) => {
 
         delete user.user_password;
 
-        console.log('User created:', user);
         response(res, {
             user,
             auth,
@@ -199,12 +198,13 @@ exports.sendVerificationMail = async (req, res) => {
 };
 
 exports.verifyUser = async (req, res) => {
-    const { user_id, auth_code } = req.body;
+    const { email, user_name, auth_code } = req.body;
 
     try {
         const user = await prisma.user.findUnique({
             where: {
-                user_id: user_id,
+                user_name: user_name,
+                email: email,
             },
             include: {
                 auth: true,
@@ -245,3 +245,75 @@ exports.verifyUser = async (req, res) => {
         await prisma.$disconnect();
     }
 };
+
+exports.passwordReset = async (req, res) => {
+    const { user_name, email } = req.body;
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                user_name: user_name,
+                email: email,
+            },
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found",
+            });
+        }
+
+        const auth = await prisma.authentication.create({
+            data: {
+                auth_code: Math.floor(Math.random() * 900000) + 100000,
+            },
+        });
+
+        await prisma.user.update({
+            where: {
+                user_id: user.user_id,
+            },
+            data: {
+                auth_id: auth.auth_id,
+            },
+        });
+
+        const request = mailjet
+            .post("send", { 'version': 'v3.1' })
+            .request({
+                "Messages": [
+                    {
+                        "From": {
+                            "Email": "minthukyaw454@gmail.com",
+                            "Name": "Authentication Email"
+                        },
+                        "To": [
+                            {
+                                "Email": email,
+                                "Name": user.first_name
+                            }
+                        ],
+                        "Subject": "Here is your verification code",
+                        "TextPart": `Dear ${user.first_name}, here is your verification code ${auth.auth_code}`,
+                        "HTMLPart": `<h3>Dear ${user.first_name}, welcome!</h3><br /><p>Your verification code is: ${auth.auth_code}</p>`
+                    }
+                ]
+            });
+
+        request
+            .then((result) => {
+                response(res, result);
+            })
+            .catch((err) => {
+                console.log(err.statusCode, err.message);
+                error_response(res, err);
+            });
+
+        response(res, "Authentication Code Sent Successfully. Please check email.");
+    } catch (error) {
+        console.error("Error fetching authentication:", error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}

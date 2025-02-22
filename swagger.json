@@ -123,6 +123,34 @@
                     }
                 }
             }
+        },
+        "/passwordReset": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Password Reset",
+                "description": "Password Reset",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Password Reset",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PasswordResetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password Reset Successfully. Verification Email Sent",
+                        "schema": {
+                            "$ref": "#/definitions/PasswordResetResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -188,7 +216,8 @@
         "VerifyUserRequest": {
             "type": "object",
             "properties": {
-                "user_id": { "type": "integer" },
+                "user_name": { "type": "string" },
+                "email": { "type": "string" },
                 "auth_code": { "type": "integer" }
             }
         },
@@ -223,6 +252,20 @@
                 "is_verified": { "type": "boolean" },
                 "createdAt": { "type": "string" },
                 "updatedAt": { "type": "string" }
+            }
+        },
+        "PasswordResetRequest": {
+            "type": "object",
+            "properties": {
+                "email": { "type": "string" },
+                "user_name": { "type": "string" }
+            }
+        },
+        "PasswordResetResponse": {
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "result": { "type": "object" }
             }
         }
     }

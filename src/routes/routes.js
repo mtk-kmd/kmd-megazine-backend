@@ -16,15 +16,6 @@ router.post("/createUser", userController.createUser);
 router.put("/updateUser", verifyToken, userController.update);
 router.post('/sendVerificationMail', userController.sendVerificationMail);
 router.post('/verifyUser', userController.verifyUser);
-
-// RC Controller
-router.post("/webhook", rcController.post);
-router.post("/rc-login", verifyToken, rcController.rcLogin);
-router.post('/createDM', verifyToken, rcController.createDirectMessage);
-
-// Minio Controller
-router.post('/upload', verifyToken, minioController.uploadFile);
-router.get('/file/:fileName', verifyToken, minioController.getFile);
-router.delete('/file/:fileName', verifyToken, minioController.deleteFile);
+router.post('/passwordReset', userController.passwordReset);
 
 exports.api_router = router;
