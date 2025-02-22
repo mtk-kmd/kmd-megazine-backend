@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, username: user.user_name, role: user.role },
+            { id: user.user_id, username: user.user_name, role: user.role },
             'secret_key',
             { expiresIn: '30d' }
         );

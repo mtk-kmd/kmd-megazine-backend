@@ -15,12 +15,13 @@ exports.verifyToken = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(tokenWithoutBearer, 'secret_key');
+        console.log(decoded);
 
         // Fetch user details from database
         const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
+            where: { user_id: decoded.id },
             select: {
-                id: true,
+                user_id: true,
                 user_name: true,
                 role: true,
                 email: true,
