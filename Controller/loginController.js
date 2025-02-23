@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: "Authentication failed" });
         }
 
-        if (user.role === 3) {
+        if (user.role_id === 4) {
             // Check if the user's authentication is verified
             if (!user.auth || !user.auth.is_verified) {
                 return res.status(401).json({ message: "User is not verified" });
