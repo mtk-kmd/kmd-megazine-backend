@@ -14,33 +14,115 @@ datasource db {
 }
 
 model User {
-    user_id       Int      @id @default(autoincrement())
-    user_name String   @unique
-    user_password String
-    first_name String
-    last_name String
-    email String @unique
-    phone Int?
-    role  Int
-    auth Authentication? @relation(fields: [auth_id], references: [auth_id])
-    auth_id Int?
-    status Boolean @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  user_id           Int                 @id @default(autoincrement())
+  user_name         String              @unique
+  user_password     String
+  first_name        String
+  last_name         String
+  email             String              @unique
+  phone             Int?
+  role              Role?               @relation(fields: [role_id], references: [role_id])
+  role_id           Int?
+  auth              Authentication?     @relation(fields: [auth_id], references: [auth_id])
+  auth_id           Int?
+  status            Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Faculty           Faculty?
+  StudentFaculty    StudentFaculty?
+  Contribution      Contribution[]
+  Comment           Comment[]
+  StudentSubmission StudentSubmission[]
 }
 
 model Role {
-    role_id Int @id @default(autoincrement())
-    role_name String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  role_id   Int      @id @default(autoincrement())
+  role_name String
+  user      User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Authentication {
-    auth_id Int @id @default(autoincrement())
-    auth_code Int
-    is_verified Boolean @default(false)
-    user User[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  auth_id     Int      @id @default(autoincrement())
+  auth_code   Int
+  is_verified Boolean  @default(false)
+  user        User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Faculty {
+  faculty_id     Int              @id @default(autoincrement())
+  name           String           @unique
+  coordinator    User?            @relation(fields: [coordinator_id], references: [user_id])
+  coordinator_id Int?             @unique
+  students       StudentFaculty[]
+  contributions  Contribution[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Contribution {
+  contribution_id Int                 @id @default(autoincrement())
+  title           String // Example: "2025 Computer Science Contribution"
+  description     String?
+  faculty         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
+  faculty_id      Int
+  submissions     StudentSubmission[]
+  contribution_content_upload_url String[]
+  status          ContributionStatus  @default(OPEN)
+  allowPublication  Boolean @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  User            User?               @relation(fields: [userUser_id], references: [user_id])
+  userUser_id     Int?
+  closure   ClosureDate?    @relation(fields: [closure_id], references: [closure_id])
+  closure_id    Int?
+}
+
+model StudentSubmission {
+  submission_id   Int          @id @default(autoincrement())
+  student         User         @relation(fields: [student_id], references: [user_id])
+  student_id      Int
+  contribution    Contribution @relation(fields: [contribution_id], references: [contribution_id])
+  contribution_id Int
+  title           String
+  content         String // Article content or MinIO file URL
+  uploadUrl          String[] // Array of image URLs stored in MinIO
+  agreed_to_terms Boolean
+  submittedAt     DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  comments        Comment[]
+}
+
+model Comment {
+  comment_id    Int               @id @default(autoincrement())
+  content       String
+  contributor   User              @relation(fields: [user_id], references: [user_id])
+  user_id       Int
+  submission    StudentSubmission @relation(fields: [submission_id], references: [submission_id])
+  submission_id Int
+  createdAt     DateTime          @default(now())
+}
+
+model StudentFaculty {
+  student_faculty_id Int     @id @default(autoincrement())
+  student            User    @relation(fields: [student_id], references: [user_id])
+  student_id         Int     @unique
+  faculty            Faculty @relation(fields: [faculty_id], references: [faculty_id])
+  faculty_id         Int
+}
+
+model ClosureDate {
+  closure_id    Int      @id @default(autoincrement())
+  entry_closure DateTime
+  final_closure DateTime
+  contribution  Contribution[]
+}
+
+enum ContributionStatus {
+  OPEN // Contribution is open for student submissions
+  CLOSED // Contribution no longer accepts new submissions
+  FINALIZED // Selected submissions are finalized for publication
 }

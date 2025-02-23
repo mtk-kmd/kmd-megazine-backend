@@ -16,13 +16,20 @@ exports.get = async (req, res) => {
                 where: {
                     id: parseInt(user_id),
                 },
+                include: {
+                    role: true,
+                }
             });
 
             if (user) {
                 delete user.user_password;
             }
         } else {
-            user = await prisma.user.findMany();
+            user = await prisma.user.findMany({
+                include: {
+                    role: true,
+                }
+            });
 
             user = user.map((u) => {
                 const { user_password, ...rest } = u;
@@ -50,7 +57,7 @@ exports.createUser = async (req, res) => {
             data: {
                 user_name: username,
                 user_password: hashedPassword,
-                role: role,
+                role_id: role,
                 email: email,
                 phone: parseInt(phone) || null,
                 first_name: first_name,
@@ -313,6 +320,45 @@ exports.passwordReset = async (req, res) => {
         response(res, "Authentication Code Sent Successfully. Please check email.");
     } catch (error) {
         console.error("Error fetching authentication:", error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.createRole = async (req, res) => {
+    const { role_name } = req.body;
+    try {
+        const role = await prisma.role.create({
+            data: {
+                role_name: role_name,
+            },
+        });
+        response(res, role);
+    } catch (error) {
+        console.error("Error creating role:", error);
+        error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.getRoles = async (req, res) => {
+    const { role_id } = req.query;
+    try {
+        if (role_id) {
+            const role = await prisma.role.findUnique({
+                where: {
+                    role_id: parseInt(role_id),
+                },
+            });
+            response(res, role);
+        }
+
+        const roles = await prisma.role.findMany();
+        response(res, roles);
+    } catch (error) {
+        console.error("Error fetching roles:", error);
+        error_response(res, error);
     } finally {
         await prisma.$disconnect();
     }
