@@ -17,10 +17,20 @@ exports.getFaculty = async (req, res) => {
                             role: true
                         }
                     },
+                    students: {
+                        include: {
+                            student: true,
+                        },
+                    }
                 },
             });
 
             delete faculty.coordinator?.user_password;
+
+            faculty.students.forEach((s) => {
+                delete s.student.user_password;
+            })
+
             return response(res, faculty);
         }
         const faculty = await prisma.faculty.findMany({
@@ -30,11 +40,19 @@ exports.getFaculty = async (req, res) => {
                         role: true
                     }
                 },
+                students: {
+                    include: {
+                        student: true,
+                    },
+                }
             },
         });
 
         faculty.forEach((f) => {
             delete f.coordinator?.user_password;
+            f.students.forEach((s) => {
+                delete s.student.user_password;
+            })
         });
         return response(res, faculty);
     } catch (error) {

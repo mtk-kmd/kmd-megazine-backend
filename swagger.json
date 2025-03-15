@@ -151,6 +151,42 @@
                     }
                 }
             }
+        },
+        "/createRole": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Create Role",
+                "description": "Create Role",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Create Role",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "message": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/CreateRoleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -262,6 +298,19 @@
             }
         },
         "PasswordResetResponse": {
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "result": { "type": "object" }
+            }
+        },
+        "CreateRoleRequest": {
+            "type": "object",
+            "properties": {
+                "role_name": { "type": "string"}
+            }
+        },
+        "CreateRoleResponse": {
             "type": "object",
             "properties": {
                 "message": { "type": "string" },
