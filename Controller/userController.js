@@ -18,6 +18,34 @@ exports.get = async (req, res) => {
                 },
                 include: {
                     role: true,
+                    StudentFaculty: {
+                        include: {
+                            faculty: true
+                        }
+                    },
+                    Faculty: {
+                        include: {
+                            students: {
+                                include: {
+                                    student: {
+                                        select: {
+                                            user_id: true,
+                                            user_name: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            phone: true,
+                                            role_id: true,
+                                            auth_id: true,
+                                            status: true,
+                                            createdAt: true,
+                                            updatedAt: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
@@ -28,6 +56,34 @@ exports.get = async (req, res) => {
             user = await prisma.user.findMany({
                 include: {
                     role: true,
+                    StudentFaculty: {
+                        include: {
+                            faculty: true
+                        }
+                    },
+                    Faculty: {
+                        include: {
+                            students: {
+                                include: {
+                                    student: {
+                                        select: {
+                                            user_id: true,
+                                            user_name: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            phone: true,
+                                            role_id: true,
+                                            auth_id: true,
+                                            status: true,
+                                            createdAt: true,
+                                            updatedAt: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
@@ -95,55 +151,51 @@ exports.createUser = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-    const { user_id, user_name, role, name, status } = req.body;
+    const { user_id, user_name, role, first_name, last_name, email, phone, status} = req.body;
 
-    const obj = {
-        user_id,
-        user_name,
-        role,
-        name,
-        status,
-    };
+    try {
+        const user = await prisma.user.update({
+            where: {
+                user_id: parseInt(user_id),
+            },
+            data: {
+                user_name: user_name,
+                role_id: role,
+                first_name: first_name,
+                last_name: last_name,
+                email: email,
+                phone: phone,
+                status: status
+            },
+        });
 
-    const getUsers = await query(
-        `SELECT * FROM sch_user_management.user_tbl WHERE user_id = $1`,
-        [obj.user_id],
-    )
+        delete user.user_password;
+        return response(res, user);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+};
 
-    if (getUsers.length > 0) {
-        // Check if the user_name already exists for a different ID
-        const getQuery = await query(
-            "SELECT * FROM sch_user_management.user_tbl WHERE user_name = $1 AND user_id != $2",
-            [user_name, user_id],
-        );
+exports.delete = async (req, res) => {
+    const { user_id } = req.body;
+    try {
+        const user = await prisma.user.update({
+            where: {
+                user_id: parseInt(user_id),
+            },
+            data: {
+                status: false,
+            }
+        });
 
-        if (getQuery.length > 0) {
-            return res.status(400).json({
-                status: 400,
-                message: "User name already exists for a different user",
-            });
-        } else {
-            const updateQuery = "UPDATE sch_user_management.user_tbl SET user_name = $1, role = $2, name = $3, updated_at = $4, status = $5 WHERE user_id = $6";
-
-            await query(
-                updateQuery,
-                [
-                    obj.user_name,
-                    obj.role,
-                    obj.name,
-                    new Date,
-                    obj.status,
-                    obj.user_id,
-                ],
-            );
-
-            response(res, obj);
-        }
-    } else {
-        return res.status(500).json({
-            status: 500,
-            message: "There is no user account with this id",
-        })
+        delete user.user_password;
+        return response(res, user);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
     }
 };
 
