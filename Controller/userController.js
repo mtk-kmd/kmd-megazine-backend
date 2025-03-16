@@ -59,7 +59,7 @@ exports.createUser = async (req, res) => {
                 user_password: hashedPassword,
                 role_id: role,
                 email: email,
-                phone: parseInt(phone) || null,
+                phone: phone || "",
                 first_name: first_name,
                 last_name: last_name,
             },
