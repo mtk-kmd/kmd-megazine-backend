@@ -150,6 +150,52 @@ exports.createUser = async (req, res) => {
     }
 };
 
+exports.createGuestUser = async (req, res) => {
+    const { first_name, last_name, phone, email } = req.body;
+
+    try {
+        const user = await prisma.guestUser.create({
+            data: {
+                first_name: first_name,
+                last_name: last_name,
+                email: email,
+                phone: phone,
+                role_id: 5
+            },
+        });
+
+        const authCode = Math.floor(Math.random() * 900000) + 100000;
+        const auth = await prisma.authentication.create({
+            data: {
+                auth_code: authCode,
+            },
+        });
+
+        console.log(authCode);
+        console.log(user.user_id);
+
+        updateGuestUser = await prisma.guestUser.update({
+            where: {
+                user_id: user.user_id,
+            },
+            data: {
+                auth_id: auth.auth_id,
+            },
+        });
+
+        if (updateGuestUser) {
+            response(res, user);
+        } else {
+            error_response(res, "Error creating Guest User");
+        }
+    } catch (error) {
+        console.error('Error creating Guest User:', error);
+        error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
 exports.update = async (req, res) => {
     const { user_id, user_name, role, first_name, last_name, email, phone, status} = req.body;
 

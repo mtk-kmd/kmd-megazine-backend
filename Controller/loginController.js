@@ -4,9 +4,30 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.login = async (req, res) => {
-    const { user_name, password } = req.body;
+    const { user_name, password, is_guest_user, email } = req.body;
 
     try {
+        if (is_guest_user) {
+            const guestUser = await prisma.guestUser.findFirst({
+                where: { email },
+                include: {
+                    auth: true,
+                },
+            });
+
+            const token = jwt.sign(
+                { id: guestUser.user_id, username: guestUser.email, role: guestUser.role },
+                'secret_key',
+                { expiresIn: '30d' }
+            );
+
+            return res.status(200).json({
+                message: "User authenticated successfully",
+                token,
+                result: guestUser,
+            });
+        }
+
         const user = await prisma.user.findUnique({
             where: { user_name },
             include: {

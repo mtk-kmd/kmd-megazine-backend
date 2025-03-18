@@ -14,44 +14,61 @@ datasource db {
 }
 
 model User {
-  user_id           Int                 @id @default(autoincrement())
-  user_name         String              @unique
-  user_password     String
-  first_name        String
-  last_name         String
-  email             String              @unique
-  phone             String?
-  role              Role?               @relation(fields: [role_id], references: [role_id])
-  role_id           Int?
-  auth              Authentication?     @relation(fields: [auth_id], references: [auth_id])
-  auth_id           Int?
-  status            Boolean             @default(true)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  Faculty           Faculty?
-  faculty_id        Int?
-  StudentFaculty    StudentFaculty?
+  user_id            Int                 @id @default(autoincrement())
+  user_name          String              @unique
+  user_password      String
+  first_name         String
+  last_name          String
+  email              String              @unique
+  phone              String?
+  role               Role?               @relation(fields: [role_id], references: [role_id])
+  role_id            Int?
+  auth               Authentication?     @relation(fields: [auth_id], references: [auth_id])
+  auth_id            Int?
+  status             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  Faculty            Faculty?
+  faculty_id         Int?
+  StudentFaculty     StudentFaculty?
   student_faculty_id Int?
-  Contribution      Contribution[]
-  Comment           Comment[]
-  StudentSubmission StudentSubmission[]
+  Contribution       Contribution[]
+  Comment            Comment[]
+  StudentSubmission  StudentSubmission[]
+}
+
+model GuestUser {
+  user_id    Int             @id @default(autoincrement())
+  first_name String?
+  last_name  String?
+  email      String
+  phone      String?
+  role       Role?           @relation(fields: [role_id], references: [role_id])
+  role_id    Int?
+  status     Boolean         @default(true)
+  auth       Authentication? @relation(fields: [auth_id], references: [auth_id])
+  auth_id    Int?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 }
 
 model Role {
-  role_id   Int      @id @default(autoincrement())
+  role_id   Int         @id @default(autoincrement())
   role_name String
   user      User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  GuestUser GuestUser[]
 }
 
 model Authentication {
-  auth_id     Int      @id @default(autoincrement())
+  auth_id     Int         @id @default(autoincrement())
   auth_code   Int
-  is_verified Boolean  @default(false)
+  is_verified Boolean     @default(false)
   user        User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  GuestUser   GuestUser[]
 }
 
 model Faculty {
@@ -66,21 +83,21 @@ model Faculty {
 }
 
 model Contribution {
-  contribution_id Int                 @id @default(autoincrement())
-  title           String // Example: "2025 Computer Science Contribution"
-  description     String?
-  faculty         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
-  faculty_id      Int
-  submissions     StudentSubmission[]
+  contribution_id                 Int                 @id @default(autoincrement())
+  title                           String // Example: "2025 Computer Science Contribution"
+  description                     String?
+  faculty                         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
+  faculty_id                      Int
+  submissions                     StudentSubmission[]
   contribution_content_upload_url String[]
-  status          ContributionStatus  @default(OPEN)
-  allowPublication  Boolean @default(false)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  User            User?               @relation(fields: [userUser_id], references: [user_id])
-  userUser_id     Int?
-  closure   ClosureDate?    @relation(fields: [closure_id], references: [closure_id])
-  closure_id    Int?
+  status                          ContributionStatus  @default(OPEN)
+  allowPublication                Boolean             @default(false)
+  createdAt                       DateTime            @default(now())
+  updatedAt                       DateTime            @updatedAt
+  User                            User?               @relation(fields: [userUser_id], references: [user_id])
+  userUser_id                     Int?
+  closure                         ClosureDate?        @relation(fields: [closure_id], references: [closure_id])
+  closure_id                      Int?
 }
 
 model StudentSubmission {
@@ -91,7 +108,7 @@ model StudentSubmission {
   contribution_id Int
   title           String
   content         String // Article content or MinIO file URL
-  uploadUrl          String[] // Array of image URLs stored in MinIO
+  uploadUrl       String[] // Array of image URLs stored in MinIO
   agreed_to_terms Boolean
   submittedAt     DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -117,7 +134,7 @@ model StudentFaculty {
 }
 
 model ClosureDate {
-  closure_id    Int      @id @default(autoincrement())
+  closure_id    Int            @id @default(autoincrement())
   entry_closure DateTime
   final_closure DateTime
   contribution  Contribution[]

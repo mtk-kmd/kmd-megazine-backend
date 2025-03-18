@@ -24,6 +24,7 @@ router.post('/createRole', verifyToken, userController.createRole);
 router.get('/getRoles', verifyToken, userController.getRoles);
 router.put('/updateUser', verifyToken, userController.update);
 router.delete('/deleteUser', verifyToken, userController.delete);
+router.post('/createGuestUser', userController.createGuestUser);
 
 // Faculty Management
 router.get('/getFaculty', verifyToken, facultyController.getFaculty);
