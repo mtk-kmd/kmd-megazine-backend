@@ -28,8 +28,14 @@ exports.login = async (req, res) => {
             });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { user_name },
+        // allow to be either user_name or email
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { user_name },
+                    { email },
+                ],
+            },
             include: {
                 auth: true,
             },
