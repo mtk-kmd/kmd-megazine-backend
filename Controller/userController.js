@@ -247,6 +247,7 @@ exports.delete = async (req, res) => {
 
 exports.sendVerificationMail = async (req, res) => {
     const { user_id } = req.body;
+
     try {
         const userInfo = await prisma.user.findUnique({
             where: {
@@ -306,10 +307,12 @@ exports.verifyUser = async (req, res) => {
     const { email, user_name, auth_code } = req.body;
 
     try {
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
             where: {
-                user_name: user_name,
-                email: email,
+                OR: [
+                    { user_name: user_name },
+                    { email: email },
+                ],
             },
             include: {
                 auth: true,
