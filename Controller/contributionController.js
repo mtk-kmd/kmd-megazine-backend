@@ -1,6 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const Minio = require('minio');
+const multer = require('multer');
+const path = require('path');
 const { response, error_response} = require('../utils/response');
+const mailjet = require('node-mailjet').connect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRET_KEY);
+
+const minioClient = new Minio.Client({
+    endPoint: process.env.MINIO_ENDPOINT || 'localhost',
+    port: 443,
+    useSSL: process.env.MINIO_USE_SSL === 'true',
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY
+});
+
+const bucketName = process.env.MINIO_BUCKET_NAME || 'images';
 
 exports.getContribution = async (req, res) => {
     const { contribution_id } = req.query;
@@ -131,24 +145,102 @@ exports.addCommentToContribution = async (req, res) => {
     }
 }
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+        // allowed everything including pdf, docx, img
+        const allowedTypes = ['.jpg', '.jpeg', '.png', '.heif', '.pdf', '.docx', '.doc'];
+        const extname = path.extname(file.originalname).toLowerCase();
+        if (allowedTypes.includes(extname)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type'));
+        }
+    }
+}).any();
+
 exports.createStudentSubmission = async (req, res) => {
-    const { contribution_id, user_id, title, content, uploadUrl, agreed_to_terms } = req.body;
+    const { contribution_id, user_id, title, content, agreed_to_terms } = req.body;
     try {
-        const urls = Array.isArray(uploadUrl) ? uploadUrl : [uploadUrl];
+        if (!req.files || req.files.length === 0) {
+            return error_response(res, { message: "No files uploaded" });
+        }
+
+        const urls = [];
+        for (const file of req.files) {
+            const fileBuffer = file.buffer;
+            const fileName = file.originalname;
+            const contentType = file.mimetype;
+            const objectName = `${Date.now()}-${fileName}`;
+
+            await minioClient.putObject(bucketName, objectName, fileBuffer, contentType);
+            const url = await minioClient.presignedGetObject(bucketName, objectName);
+            urls.push(url);
+        }
 
         const submission = await prisma.studentSubmission.create({
             data: {
                 contribution_id: parseInt(contribution_id),
                 student_id: parseInt(user_id),
-                title: title,
-                content: content,
+                title: title || "Untitled",
+                content: content || "",
                 uploadUrl: urls,
-                agreed_to_terms: agreed_to_terms,
+                agreed_to_terms: agreed_to_terms === "true" || agreed_to_terms === true,
             },
         });
-        if (!submission) {
-            return error_response(res, { message: "Submission not created" });
-        }
+
+        const getOneSubmission = await prisma.studentSubmission.findUnique({
+            where: {
+                submission_id: submission.submission_id,
+            },
+            include: {
+                contribution: {
+                    include: {
+                        faculty: true,
+                        User: true,
+                        closure: true,
+                    }
+                },
+                student: {
+                    select: {
+                        user_id: true,
+                        role: true,
+                        user_name: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone: true,
+                        role_id: true,
+                    }
+                },
+                comments: true,
+            },
+        });
+
+        delete getOneSubmission.contribution.User?.user_password;
+
+        const emailPayload = {
+            "Messages": [
+                {
+                    "From": {
+                        "Email": "minthukyaw454@gmail.com",
+                        "Name": "A new contribution submission"
+                    },
+                    "To": [
+                        {
+                            "Email": getOneSubmission.contribution.User?.email,
+                            "Name": getOneSubmission.contribution.User?.first_name
+                        }
+                    ],
+                    "Subject": "Guest user registered to your faculty",
+                    "TextPart": `Dear ${getOneSubmission.contribution.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted contribution ${getOneSubmission.contribution.title}.`,
+                    "HTMLPart": `<h3>Dear ${getOneSubmission.contribution.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted contribution ${getOneSubmission.contribution.title}.</p>`,
+                }
+            ]
+        };
+
+        await mailjet.post("send", { version: 'v3.1' }).request(emailPayload);
+
         return response(res, submission);
     } catch (error) {
         return error_response(res, error);

@@ -32,28 +32,29 @@ model User {
   faculty_id         Int?
   StudentFaculty     StudentFaculty?
   student_faculty_id Int?
-  GuestFaculty  GuestFaculty?
-  guest_faculty_id  Int?
+  GuestFaculty       GuestFaculty?
+  guest_faculty_id   Int?
   Contribution       Contribution[]
+  Event              Event[]
   Comment            Comment[]
   StudentSubmission  StudentSubmission[]
 }
 
 model Role {
-  role_id   Int         @id @default(autoincrement())
+  role_id   Int      @id @default(autoincrement())
   role_name String
   user      User[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Authentication {
-  auth_id     Int         @id @default(autoincrement())
+  auth_id     Int      @id @default(autoincrement())
   auth_code   Int
-  is_verified Boolean     @default(false)
+  is_verified Boolean  @default(false)
   user        User[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Faculty {
@@ -86,7 +87,22 @@ model Contribution {
   closure_id                      Int?
 }
 
-model StudentSubmission {  // article
+model Event {
+  event_id                        Int                @id @default(autoincrement())
+  title                           String // Example: "2025 Computer Science Event"
+  description                     String?
+  contribution_content_upload_url String[]
+  status                          ContributionStatus @default(OPEN)
+  allowPublication                Boolean            @default(false)
+  createdAt                       DateTime           @default(now())
+  updatedAt                       DateTime           @updatedAt
+  User                            User?              @relation(fields: [userUser_id], references: [user_id])
+  userUser_id                     Int?
+  closure                         ClosureDate?       @relation(fields: [closure_id], references: [closure_id])
+  closure_id                      Int?
+}
+
+model StudentSubmission {
   submission_id   Int          @id @default(autoincrement())
   student         User         @relation(fields: [student_id], references: [user_id])
   student_id      Int
@@ -94,7 +110,7 @@ model StudentSubmission {  // article
   contribution_id Int
   title           String
   content         String // Article content or MinIO file URL
-  uploadUrl       String[] // Array of image URLs stored in MinIO
+  uploadUrl       String[] // Array of file URLs stored in MinIO
   agreed_to_terms Boolean
   submittedAt     DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -120,10 +136,10 @@ model StudentFaculty {
 }
 
 model GuestFaculty {
-  guest_faculty_id Int       @id @default(autoincrement())
-  guest            User @relation(fields: [guest_id], references: [user_id])
-  guest_id         Int       @unique
-  faculty          Faculty   @relation(fields: [faculty_id], references: [faculty_id])
+  guest_faculty_id Int     @id @default(autoincrement())
+  guest            User    @relation(fields: [guest_id], references: [user_id])
+  guest_id         Int     @unique
+  faculty          Faculty @relation(fields: [faculty_id], references: [faculty_id])
   faculty_id       Int
 }
 
@@ -132,6 +148,7 @@ model ClosureDate {
   entry_closure DateTime
   final_closure DateTime
   contribution  Contribution[]
+  event         Event[]
 }
 
 enum ContributionStatus {
