@@ -32,24 +32,11 @@ model User {
   faculty_id         Int?
   StudentFaculty     StudentFaculty?
   student_faculty_id Int?
+  GuestFaculty  GuestFaculty?
+  guest_faculty_id  Int?
   Contribution       Contribution[]
   Comment            Comment[]
   StudentSubmission  StudentSubmission[]
-}
-
-model GuestUser {
-  user_id    Int             @id @default(autoincrement())
-  first_name String?
-  last_name  String?
-  email      String
-  phone      String?
-  role       Role?           @relation(fields: [role_id], references: [role_id])
-  role_id    Int?
-  status     Boolean         @default(true)
-  auth       Authentication? @relation(fields: [auth_id], references: [auth_id])
-  auth_id    Int?
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
 }
 
 model Role {
@@ -58,7 +45,6 @@ model Role {
   user      User[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  GuestUser GuestUser[]
 }
 
 model Authentication {
@@ -68,7 +54,6 @@ model Authentication {
   user        User[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  GuestUser   GuestUser[]
 }
 
 model Faculty {
@@ -77,6 +62,7 @@ model Faculty {
   coordinator    User?            @relation(fields: [coordinator_id], references: [user_id])
   coordinator_id Int?             @unique
   students       StudentFaculty[]
+  guests         GuestFaculty[]
   contributions  Contribution[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -100,7 +86,7 @@ model Contribution {
   closure_id                      Int?
 }
 
-model StudentSubmission {
+model StudentSubmission {  // article
   submission_id   Int          @id @default(autoincrement())
   student         User         @relation(fields: [student_id], references: [user_id])
   student_id      Int
@@ -131,6 +117,14 @@ model StudentFaculty {
   student_id         Int     @unique
   faculty            Faculty @relation(fields: [faculty_id], references: [faculty_id])
   faculty_id         Int
+}
+
+model GuestFaculty {
+  guest_faculty_id Int       @id @default(autoincrement())
+  guest            User @relation(fields: [guest_id], references: [user_id])
+  guest_id         Int       @unique
+  faculty          Faculty   @relation(fields: [faculty_id], references: [faculty_id])
+  faculty_id       Int
 }
 
 model ClosureDate {

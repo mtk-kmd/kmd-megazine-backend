@@ -24,16 +24,19 @@ router.post('/createRole', verifyToken, userController.createRole);
 router.get('/getRoles', verifyToken, userController.getRoles);
 router.put('/updateUser', verifyToken, userController.update);
 router.delete('/deleteUser', verifyToken, userController.delete);
-router.post('/createGuestUser', userController.createGuestUser);
 
 // Faculty Management
-router.get('/getFaculty', verifyToken, facultyController.getFaculty);
+router.get('/getFaculty', facultyController.getFaculty);
 router.post('/createFaculty', verifyToken, facultyController.createFaculty);
 router.put('/updateFaculty', verifyToken, facultyController.updateFaculty);
 router.post('/addStudentToFaculty', verifyToken, facultyController.addStudentToFaculty);
+router.post('/addGuestToFaculty', facultyController.addGuestToFaculty);
 
 // Contribution Management
 router.get('/getContributions', verifyToken, contributionController.getContribution);
 router.post('/createContribution', verifyToken, contributionController.createContribution);
+router.post('/addCommentToContribution', verifyToken, contributionController.addCommentToContribution);
+router.post('/createStudentSubmission', verifyToken, contributionController.createStudentSubmission);
+router.get('/getStudentSubmissions', contributionController.getStudentSubmission);
 
 exports.api_router = router;

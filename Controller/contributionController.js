@@ -108,3 +108,119 @@ exports.createContribution = async (req, res) => {
         await prisma.$disconnect();
     }
 }
+
+exports.addCommentToContribution = async (req, res) => {
+    const { submission_id, comment, user_id } = req.body;
+    try {
+        const contributionComment = await prisma.comment.create({
+            data: {
+                submission_id: parseInt(submission_id),
+                content: comment,
+                user_id: parseInt(user_id),
+            },
+        });
+        if (!contributionComment) {
+            return error_response(res, { message: "Comment not added" });
+        }
+
+        return response(res, contributionComment);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.createStudentSubmission = async (req, res) => {
+    const { contribution_id, user_id, title, content, uploadUrl, agreed_to_terms } = req.body;
+    try {
+        const urls = Array.isArray(uploadUrl) ? uploadUrl : [uploadUrl];
+
+        const submission = await prisma.studentSubmission.create({
+            data: {
+                contribution_id: parseInt(contribution_id),
+                student_id: parseInt(user_id),
+                title: title,
+                content: content,
+                uploadUrl: urls,
+                agreed_to_terms: agreed_to_terms,
+            },
+        });
+        if (!submission) {
+            return error_response(res, { message: "Submission not created" });
+        }
+        return response(res, submission);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.getStudentSubmission = async (req, res) => {
+    const { submission_id } = req.query;
+    try {
+        if (submission_id) {
+            const submission = await prisma.studentSubmission.findUnique({
+                where: {
+                    submission_id: parseInt(submission_id),
+                },
+                include: {
+                    contribution: true,
+                    student: true,
+                    comments: {
+                        include: {
+                            contributor: true,
+                        }
+                    }
+                },
+            });
+            return response(res, submission);
+        } else {
+            const submission = await prisma.studentSubmission.findMany({
+                include: {
+                    contribution: true,
+                    student: {
+                        select: {
+                            user_id: true,
+                            role: true,
+                            user_name: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            phone: true,
+                            role_id: true,
+                            StudentFaculty: {
+                                include: {
+                                    faculty: true
+                                }
+                            },
+                        }
+                    },
+                    comments: {
+                        include: {
+                            contributor: {
+                                select: {
+                                    user_id: true,
+                                    role: true,
+                                    user_name: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true,
+                                    phone: true,
+                                    role_id: true,
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+
+            return response(res, submission);
+        }
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
