@@ -31,7 +31,13 @@ exports.getContribution = async (req, res) => {
                         }
                     },
                     faculty: true,
-                    closure: true
+                    closure: true,
+                    submissions: true,
+                    submissions: {
+                        include: {
+                            comments: true
+                        }
+                    }
                 },
             });
             delete contribution.User?.user_password;
@@ -45,7 +51,12 @@ exports.getContribution = async (req, res) => {
                         }
                     },
                     faculty: true,
-                    closure: true
+                    closure: true,
+                    submissions: {
+                        include: {
+                            comments: true
+                        }
+                    }
                 },
             });
             contribution.forEach((c) => {
