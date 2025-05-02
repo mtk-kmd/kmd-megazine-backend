@@ -11,7 +11,7 @@ const browserTrackingMiddleware = async (req, res, next) => {
         let user = null;
 
         if (!token) {
-            return next();
+            console.log('No token provided.');
         } else {
             const tokenWithoutBearer = token.replace('Bearer ', '');
             const decoded = jwt.verify(tokenWithoutBearer, 'secret_key');
