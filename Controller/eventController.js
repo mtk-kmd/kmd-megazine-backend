@@ -1,20 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const Minio = require('minio');
-const multer = require('multer');
-const path = require('path');
 const { response, error_response} = require('../utils/response');
 const mailjet = require('node-mailjet').connect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRET_KEY);
-
-const minioClient = new Minio.Client({
-    endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-    port: 443,
-    useSSL: process.env.MINIO_USE_SSL === 'true',
-    accessKey: process.env.MINIO_ACCESS_KEY,
-    secretKey: process.env.MINIO_SECRET_KEY
-});
-
-const bucketName = process.env.MINIO_BUCKET_NAME || 'images';
 
 exports.createEvent = async (req, res) => {
     const { title, description, createdBy, entry_closure, final_closure, faculty_id } = req.body;
@@ -70,6 +57,28 @@ exports.createEvent = async (req, res) => {
         });
 
         delete getEvent.User?.user_password;
+
+        const emailPayload = {
+            "Messages": [
+                {
+                    "From": {
+                        "Email": "minthukyaw454@gmail.com",
+                        "Name": "A new event"
+                    },
+                    "To": [
+                        {
+                            "Email": getEvent.User?.email,
+                            "Name": getEvent.User?.first_name
+                        }
+                    ],
+                    "Subject": "A new event has been created",
+                    "TextPart": `Dear ${getEvent.User?.first_name}, event name ${getEvent.title} has been created.`,
+                    "HTMLPart": `<h3>Dear ${getEvent.User?.first_name},</h3><br><p>event name ${getEvent.title} has been created.</p>`,
+                }
+            ]
+        };
+
+        await mailjet.post("send", { version: 'v3.1' }).request(emailPayload);
 
         return response(res, getEvent);
     } catch (error) {
