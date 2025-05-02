@@ -38,6 +38,7 @@ model User {
   Event              Event[]
   Comment            Comment[]
   StudentSubmission  StudentSubmission[]
+  browserTracking    browserTracking[]
 }
 
 model Role {
@@ -149,6 +150,22 @@ model ClosureDate {
   final_closure DateTime
   contribution  Contribution[]
   event         Event[]
+}
+
+model browserTracking {
+  id              Int      @id @default(autoincrement())
+  browser_name    String
+  browser_version String?
+  os_name         String
+  os_version      String
+  device_type     String
+  device_vendor   String
+  device_model    String
+  request_path    String
+  request_method  String
+  createdAt       DateTime @default(now())
+  user            User?    @relation(fields: [user_id], references: [user_id])
+  user_id         Int?
 }
 
 enum ContributionStatus {

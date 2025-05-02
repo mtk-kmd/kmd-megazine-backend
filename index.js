@@ -7,6 +7,7 @@ const { log_middleware } = require("./middlewares/logMiddleware");
 const { errorHandler } = require("./middlewares/errMiddleware");
 const { api_router } = require("./src/routes/routes");
 const cors = require("cors");
+const { browserTrackingMiddleware } = require('./middlewares/browserTrackingMiddleware');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
@@ -23,7 +24,7 @@ pool.connect(function(err) {
   const SERVER_PORT = process.env.SERVER_PORT || 8000;
   app.use(log_middleware);
   app.use(cors())
-
+  app.use(browserTrackingMiddleware);
   app.use(bodyParser.json());
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   app.use("/api",api_router);

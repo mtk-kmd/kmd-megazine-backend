@@ -10,6 +10,7 @@ const { verifyToken } = require('../../middlewares/authMiddleware');
 const facultyController = require('../../Controller/facultyController');
 const contributionController = require('../../Controller/contributionController');
 const eventController = require('../../Controller/eventController');
+const browserController = require('../../Controller/browserController');
 const upload = multer({ storage: multer.memoryStorage() }).any();
 
 router.get("/hello", helloController.hello);
@@ -45,5 +46,9 @@ router.get('/getStudentSubmissions', contributionController.getStudentSubmission
 // Event Management
 router.get('/getEvent', eventController.getEvent);
 router.post('/createEvent', verifyToken, eventController.createEvent);
+
+// Browser Tracking Management
+router.get('/trackBrowser', browserController.trackBrowser);
+router.get('/getBrowserUsages', browserController.getBrowserUsages);
 
 exports.api_router = router;

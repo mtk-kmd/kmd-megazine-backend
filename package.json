@@ -44,6 +44,7 @@
     "stripe": "^17.6.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
+    "ua-parser-js": "^2.0.3",
     "uuid": "^9.0.0",
     "wildcard-match": "^5.1.2",
     "winston": "^3.10.0"
