@@ -66,6 +66,7 @@ model Faculty {
   students       StudentFaculty[]
   guests         GuestFaculty[]
   contributions  Contribution[]
+  event          Event[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -93,6 +94,8 @@ model Event {
   title                           String // Example: "2025 Computer Science Event"
   description                     String?
   contribution_content_upload_url String[]
+  faculty                         Faculty?           @relation(fields: [faculty_id], references: [faculty_id])
+  faculty_id                      Int?
   status                          ContributionStatus @default(OPEN)
   allowPublication                Boolean            @default(false)
   createdAt                       DateTime           @default(now())

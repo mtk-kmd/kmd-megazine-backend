@@ -17,18 +17,19 @@ const minioClient = new Minio.Client({
 const bucketName = process.env.MINIO_BUCKET_NAME || 'images';
 
 exports.createEvent = async (req, res) => {
-    const { title, description, createdBy, entry_closure, final_closure } = req.body;
+    const { title, description, createdBy, entry_closure, final_closure, faculty_id } = req.body;
     try {
         const event = await prisma.event.create({
             data: {
                 title: title,
                 description: description,
                 userUser_id: parseInt(createdBy),
+                faculty_id: parseInt(faculty_id),
             },
         });
 
         if (!event) {
-            return error_response(res, { message: "Contribution not created" });
+            return error_response(res, { message: "Event not created" });
         }
 
         if (entry_closure && final_closure) {
@@ -49,7 +50,7 @@ exports.createEvent = async (req, res) => {
             });
 
             if (!updateEvent) {
-                return error_response(res, { message: "Contribution not updated" });
+                return error_response(res, { message: "Event not updated" });
             }
         }
 
@@ -63,7 +64,8 @@ exports.createEvent = async (req, res) => {
                         role: true
                     }
                 },
-                closure: true
+                closure: true,
+                faculty: true,
             },
         });
 
@@ -92,7 +94,12 @@ exports.getEvent = async (req, res) => {
                             role: true
                         }
                     },
-                    closure: true
+                    closure: true,
+                    faculty: {
+                        include: {
+                            contributions: true
+                        }
+                    }
                 },
             });
             delete event.User?.user_password;
@@ -105,7 +112,12 @@ exports.getEvent = async (req, res) => {
                             role: true
                         }
                     },
-                    closure: true
+                    closure: true,
+                    faculty: {
+                        include: {
+                            contributions: true
+                        }
+                    }
                 },
             });
             event.forEach((c) => {
@@ -113,6 +125,81 @@ exports.getEvent = async (req, res) => {
             })
             return response(res, event);
         }
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.updateEvent = async (req, res) => {
+    const { event_id, title, description, createdBy, entry_closure, final_closure, faculty_id } = req.body;
+
+    try {
+        const event = await prisma.event.update({
+            where: {
+                event_id: parseInt(event_id),
+            },
+            data: {
+                title: title,
+                description: description,
+                userUser_id: parseInt(createdBy),
+                faculty_id: parseInt(faculty_id),
+            },
+        });
+
+        if (entry_closure && final_closure) {
+            await prisma.closureDate.update({
+                where: {
+                    closure_id: event.closure_id,
+                },
+                data: {
+                    entry_closure: entry_closure,
+                    final_closure: final_closure,
+                }
+            })
+        }
+
+        if (!event) {
+            return error_response(res, { message: "Event not updated" });
+        }
+
+        const getEvent = await prisma.event.findUnique({
+            where: {
+                event_id: event.event_id,
+            },
+            include: {
+                User: {
+                    include: {
+                        role: true
+                    }
+                },
+                closure: true,
+                faculty: true,
+            },
+        });
+        delete getEvent.User?.user_password;
+
+        return response(res, getEvent);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.deleteEvent = async (req, res) => {
+    const { event_id } = req.body;
+    try {
+        const event = await prisma.event.delete({
+            where: {
+                event_id: parseInt(event_id),
+            },
+        });
+        if (!event) {
+            return error_response(res, { message: "Event not deleted" });
+        }
+        return response(res, { message: "Event deleted"});
     } catch (error) {
         return error_response(res, error);
     } finally {

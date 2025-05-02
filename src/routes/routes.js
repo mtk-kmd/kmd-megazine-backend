@@ -11,6 +11,7 @@ const facultyController = require('../../Controller/facultyController');
 const contributionController = require('../../Controller/contributionController');
 const eventController = require('../../Controller/eventController');
 const browserController = require('../../Controller/browserController');
+const analyticsController = require('../../Controller/analyticController');
 const upload = multer({ storage: multer.memoryStorage() }).any();
 
 router.get("/hello", helloController.hello);
@@ -46,6 +47,11 @@ router.get('/getStudentSubmissions', contributionController.getStudentSubmission
 // Event Management
 router.get('/getEvent', eventController.getEvent);
 router.post('/createEvent', verifyToken, eventController.createEvent);
+router.put('/updateEvent', verifyToken, eventController.updateEvent);
+router.delete('/deleteEvent', verifyToken, eventController.deleteEvent);
+
+// Analytics Management
+router.get('/dashboard-stats', verifyToken, analyticsController.getDashboardStats);
 
 // Browser Tracking Management
 router.get('/trackBrowser', browserController.trackBrowser);

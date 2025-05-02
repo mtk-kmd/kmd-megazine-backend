@@ -28,8 +28,6 @@ const browserTrackingMiddleware = async (req, res, next) => {
             });
         }
 
-        console.log('User:', user);
-
         await prisma.browserTracking.create({
             data: {
                 browser_name: browserInfo.browser.name || 'Unknown',
