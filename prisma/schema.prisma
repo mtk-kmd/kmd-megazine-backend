@@ -91,18 +91,19 @@ model ViewCount {
 }
 
 model StudentSubmission {
-  submission_id   Int       @id @default(autoincrement())
-  student_id      Int
-  title           String
-  content         String
-  agreed_to_terms Boolean
-  submittedAt     DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  uploadUrl       String[]
-  comments        Comment[]
-  event           Event?    @relation(fields: [event_id], references: [event_id])
-  event_id        Int?
-  student         User      @relation(fields: [student_id], references: [user_id])
+  submission_id     Int              @id @default(autoincrement())
+  student_id        Int
+  title             String
+  content           String
+  agreed_to_terms   Boolean
+  submittedAt       DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  uploadUrl         String[]
+  comments          Comment[]
+  event             Event?           @relation(fields: [event_id], references: [event_id])
+  event_id          Int?
+  student           User             @relation(fields: [student_id], references: [user_id])
+  submission_status SubmissionStatus @default(PENDING)
 }
 
 model Comment {
@@ -158,4 +159,10 @@ enum ContributionStatus {
   OPEN
   CLOSED
   FINALIZED
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

@@ -223,3 +223,22 @@ exports.getStudentContribution = async (req, res) => {
         await prisma.$disconnect();
     }
 }
+
+exports.updateSubmissionStatus = async (req, res) => {
+    const { submission_id, status } = req.body;
+    try {
+        const submission = await prisma.studentSubmission.update({
+            where: {
+                submission_id: parseInt(submission_id),
+            },
+            data: {
+                submission_status: status,
+            },
+        });
+        return response(res, submission);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
