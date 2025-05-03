@@ -8,9 +8,9 @@ exports.getDashboardStats = async (req, res) => {
             prisma.user.count(),
             // Total faculties count
             prisma.faculty.count(),
-            // Total contributions count
-            prisma.contribution.count(),
-            // Total student admissions (StudentFaculty entries)
+            // Total events count
+            prisma.event.count(),
+            // Total student faculty (StudentFaculty entries)
             prisma.studentFaculty.count(),
             // Active users (status = true)
             prisma.user.count({
@@ -33,8 +33,8 @@ exports.getDashboardStats = async (req, res) => {
         res.json({
             totalUsers: stats[0],
             totalFaculties: stats[1],
-            totalContributions: stats[2],
-            totalStudentAdmissions: stats[3],
+            totalEvents: stats[2],
+            totalStudentFaculties: stats[3],
             activeUsers: stats[4],
             recentSubmissions: stats[5],
             totalEvents: stats[6],
