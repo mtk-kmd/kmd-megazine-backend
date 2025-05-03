@@ -16,124 +16,6 @@ const minioClient = new Minio.Client({
 
 const bucketName = process.env.MINIO_BUCKET_NAME || 'images';
 
-exports.getContribution = async (req, res) => {
-    const { contribution_id } = req.query;
-    try {
-        if (contribution_id) {
-            const contribution = await prisma.contribution.findUnique({
-                where: {
-                    contribution_id: parseInt(contribution_id),
-                },
-                include: {
-                    User: {
-                        include: {
-                            role: true
-                        }
-                    },
-                    faculty: true,
-                    closure: true,
-                    submissions: true,
-                    submissions: {
-                        include: {
-                            comments: true
-                        }
-                    }
-                },
-            });
-            delete contribution.User?.user_password;
-            return response(res, contribution);
-        } else {
-            const contribution = await prisma.contribution.findMany({
-                include: {
-                    User: {
-                        include: {
-                            role: true
-                        }
-                    },
-                    faculty: true,
-                    closure: true,
-                    submissions: {
-                        include: {
-                            comments: true
-                        }
-                    }
-                },
-            });
-            contribution.forEach((c) => {
-                delete c.User?.user_password;
-            })
-            return response(res, contribution);
-        }
-    } catch (error) {
-        return error_response(res, error);
-    } finally {
-        await prisma.$disconnect();
-    }
-}
-
-exports.createContribution = async (req, res) => {
-    const { title, description, faculty_id, createdBy, entry_closure, final_closure } = req.body;
-    try {
-        const contribution = await prisma.contribution.create({
-            data: {
-                title: title,
-                description: description,
-                faculty_id: parseInt(faculty_id),
-                userUser_id: parseInt(createdBy),
-            },
-        });
-
-        if (!contribution) {
-            return error_response(res, { message: "Contribution not created" });
-        }
-
-        if (entry_closure && final_closure) {
-            const closure = await prisma.closureDate.create({
-                data: {
-                    entry_closure: entry_closure,
-                    final_closure: final_closure,
-                },
-            });
-
-            const updateContribution = await prisma.contribution.update({
-                where: {
-                    contribution_id: contribution.contribution_id,
-                },
-                data: {
-                    closure_id: closure.closure_id,
-                },
-            });
-
-            if (!updateContribution) {
-                return error_response(res, { message: "Contribution not updated" });
-            }
-        }
-
-        const getContribution = await prisma.contribution.findUnique({
-            where: {
-                contribution_id: contribution.contribution_id,
-            },
-            include: {
-                User: {
-                    include: {
-                        role: true
-                    }
-                },
-                faculty: true,
-                closure: true
-            },
-        });
-
-        delete getContribution.User?.user_password;
-
-        return response(res, getContribution);
-    } catch (error) {
-        return error_response(res, error);
-    } finally {
-        await prisma.$disconnect();
-    }
-}
-
 exports.addCommentToContribution = async (req, res) => {
     const { submission_id, comment, user_id } = req.body;
     try {
@@ -170,8 +52,8 @@ const upload = multer({
     }
 }).any();
 
-exports.createStudentSubmission = async (req, res) => {
-    const { contribution_id, user_id, title, content, agreed_to_terms } = req.body;
+exports.createStudentContribution = async (req, res) => {
+    const { event_id, user_id, title, content, agreed_to_terms } = req.body;
     try {
         if (!req.files || req.files.length === 0) {
             return error_response(res, { message: "No files uploaded" });
@@ -191,7 +73,7 @@ exports.createStudentSubmission = async (req, res) => {
 
         const submission = await prisma.studentSubmission.create({
             data: {
-                contribution_id: parseInt(contribution_id),
+                event_id: parseInt(event_id),
                 student_id: parseInt(user_id),
                 title: title || "Untitled",
                 content: content || "",
@@ -205,9 +87,9 @@ exports.createStudentSubmission = async (req, res) => {
                 submission_id: submission.submission_id,
             },
             include: {
-                contribution: {
+                event: {
                     include: {
-                        faculty: true,
+                        Faculty: true,
                         User: true,
                         closure: true,
                     }
@@ -228,24 +110,24 @@ exports.createStudentSubmission = async (req, res) => {
             },
         });
 
-        delete getOneSubmission.contribution.User?.user_password;
+        delete getOneSubmission.event.User?.user_password;
 
         const emailPayload = {
             "Messages": [
                 {
                     "From": {
                         "Email": "minthukyaw454@gmail.com",
-                        "Name": "A new contribution submission"
+                        "Name": "A new event submission"
                     },
                     "To": [
                         {
-                            "Email": getOneSubmission.contribution.User?.email,
-                            "Name": getOneSubmission.contribution.User?.first_name
+                            "Email": getOneSubmission.event.User?.email,
+                            "Name": getOneSubmission.event.User?.first_name
                         }
                     ],
                     "Subject": "Guest user registered to your faculty",
-                    "TextPart": `Dear ${getOneSubmission.contribution.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted contribution ${getOneSubmission.contribution.title}.`,
-                    "HTMLPart": `<h3>Dear ${getOneSubmission.contribution.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted contribution ${getOneSubmission.contribution.title}.</p>`,
+                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.`,
+                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.</p>`,
                 }
             ]
         };
@@ -260,7 +142,7 @@ exports.createStudentSubmission = async (req, res) => {
     }
 }
 
-exports.getStudentSubmission = async (req, res) => {
+exports.getStudentContribution = async (req, res) => {
     const { submission_id } = req.query;
     try {
         if (submission_id) {
@@ -269,7 +151,14 @@ exports.getStudentSubmission = async (req, res) => {
                     submission_id: parseInt(submission_id),
                 },
                 include: {
-                    contribution: true,
+                    event: {
+                        include: {
+                            Faculty: true,
+                            User: true,
+                            closure: true,
+                            view_count: true,
+                        }
+                    },
                     student: true,
                     comments: {
                         include: {
@@ -282,7 +171,14 @@ exports.getStudentSubmission = async (req, res) => {
         } else {
             const submission = await prisma.studentSubmission.findMany({
                 include: {
-                    contribution: true,
+                    event: {
+                        include: {
+                            Faculty: true,
+                            User: true,
+                            closure: true,
+                            view_count: true,
+                        }
+                    },
                     student: {
                         select: {
                             user_id: true,
