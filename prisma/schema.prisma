@@ -71,24 +71,6 @@ model Faculty {
   updatedAt      DateTime         @updatedAt
 }
 
-model Contribution {
-  contribution_id                 Int                 @id @default(autoincrement())
-  title                           String // Example: "2025 Computer Science Contribution"
-  description                     String?
-  faculty                         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
-  faculty_id                      Int
-  submissions                     StudentSubmission[]
-  contribution_content_upload_url String[]
-  status                          ContributionStatus  @default(OPEN)
-  allowPublication                Boolean             @default(false)
-  createdAt                       DateTime            @default(now())
-  updatedAt                       DateTime            @updatedAt
-  User                            User?               @relation(fields: [userUser_id], references: [user_id])
-  userUser_id                     Int?
-  closure                         ClosureDate?        @relation(fields: [closure_id], references: [closure_id])
-  closure_id                      Int?
-}
-
 model Event {
   event_id                        Int                @id @default(autoincrement())
   title                           String // Example: "2025 Computer Science Event"
@@ -104,6 +86,14 @@ model Event {
   userUser_id                     Int?
   closure                         ClosureDate?       @relation(fields: [closure_id], references: [closure_id])
   closure_id                      Int?
+  view_count                      ViewCount[]
+}
+
+model ViewCount {
+  view_count_id Int            @id @default(autoincrement())
+  count         Int
+  event  Event  @relation(fields: [event_id]: references: [event_id])
+  event_id Int
 }
 
 model StudentSubmission {

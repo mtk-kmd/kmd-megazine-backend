@@ -24,7 +24,7 @@ pool.connect(function(err) {
   const SERVER_PORT = process.env.SERVER_PORT || 8000;
   app.use(log_middleware);
   app.use(cors())
-  app.use(browserTrackingMiddleware);
+//   app.use(browserTrackingMiddleware);
   app.use(bodyParser.json());
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   app.use("/api",api_router);

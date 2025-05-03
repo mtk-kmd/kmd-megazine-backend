@@ -18,7 +18,7 @@ const bucketName = process.env.MINIO_BUCKET_NAME || 'images';
 
 exports.getContribution = async (req, res) => {
     const { contribution_id } = req.query;
-    try {
+    // try {
         if (contribution_id) {
             const contribution = await prisma.contribution.findUnique({
                 where: {
@@ -32,14 +32,38 @@ exports.getContribution = async (req, res) => {
                     },
                     faculty: true,
                     closure: true,
-                    submissions: true,
                     submissions: {
                         include: {
                             comments: true
                         }
-                    }
+                    },
                 },
             });
+
+            const viewCount = await prisma.viewCount.findUnique({
+                where: {
+                    contribution_id: contribution.contribution_id,
+                },
+            });
+
+            if (!viewCount) {
+                await prisma.viewCount.create({
+                    data: {
+                        event_id: contribution.contribution_id,
+                        views: 1,
+                    },
+                });
+            } else {
+                await prisma.viewCount.update({
+                    where: {
+                        contribution: contribution.contribution_id,
+                    },
+                    data: {
+                        views: viewCount.views + 1,
+                    },
+                });
+            }
+
             delete contribution.User?.user_password;
             return response(res, contribution);
         } else {
@@ -56,7 +80,7 @@ exports.getContribution = async (req, res) => {
                         include: {
                             comments: true
                         }
-                    }
+                    },
                 },
             });
             contribution.forEach((c) => {
@@ -64,11 +88,11 @@ exports.getContribution = async (req, res) => {
             })
             return response(res, contribution);
         }
-    } catch (error) {
-        return error_response(res, error);
-    } finally {
-        await prisma.$disconnect();
-    }
+    // } catch (error) {
+    //     return error_response(res, error);
+    // } finally {
+    //     await prisma.$disconnect();
+    // }
 }
 
 exports.createContribution = async (req, res) => {
