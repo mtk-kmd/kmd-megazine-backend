@@ -104,13 +104,34 @@ exports.getEvent = async (req, res) => {
                         }
                     },
                     closure: true,
-                    faculty: {
-                        include: {
-                            contributions: true
-                        }
-                    }
+                    Faculty: true,
                 },
             });
+
+            const viewCount = await prisma.viewCount.findFirst({
+                where: {
+                    event_id: parseInt(event_id)
+                }
+            });
+
+            if (!viewCount) {
+                await prisma.viewCount.create({
+                    data: {
+                        event_id: event.event_id,
+                        count: 1,
+                    },
+                });
+            } else {
+                await prisma.viewCount.update({
+                    where: {
+                        event: event.event_id,
+                    },
+                    data: {
+                        count: viewCount.count + 1,
+                    },
+                });
+            }
+
             delete event.User?.user_password;
             return response(res, event);
         } else {
@@ -122,11 +143,7 @@ exports.getEvent = async (req, res) => {
                         }
                     },
                     closure: true,
-                    faculty: {
-                        include: {
-                            contributions: true
-                        }
-                    }
+                    Faculty: true,
                 },
             });
             event.forEach((c) => {

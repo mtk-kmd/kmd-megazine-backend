@@ -24,7 +24,6 @@ model User {
   student_faculty_id Int?
   guest_faculty_id   Int?
   Comment            Comment[]
-  Contribution       Contribution[]
   Event              Event[]
   Faculty            Faculty?
   GuestFaculty       GuestFaculty?
@@ -58,7 +57,6 @@ model Faculty {
   coordinator_id Int?             @unique
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  Contribution   Contribution[]
   event          Event[]
   coordinator    User?            @relation(fields: [coordinator_id], references: [user_id])
   guests         GuestFaculty[]
@@ -66,42 +64,45 @@ model Faculty {
 }
 
 model Event {
-  event_id                        Int                @id @default(autoincrement())
+  event_id                        Int                 @id @default(autoincrement())
   title                           String
   description                     String?
   contribution_content_upload_url String[]
-  status                          ContributionStatus @default(OPEN)
-  allowPublication                Boolean            @default(false)
-  createdAt                       DateTime           @default(now())
-  updatedAt                       DateTime           @updatedAt
+  status                          ContributionStatus  @default(OPEN)
+  allowPublication                Boolean             @default(false)
+  createdAt                       DateTime            @default(now())
+  updatedAt                       DateTime            @updatedAt
   userUser_id                     Int?
-  closure_id                      Int?
   faculty_id                      Int?
-  closure                         ClosureDate?       @relation(fields: [closure_id], references: [closure_id])
+  closure                         ClosureDate?        @relation(fields: [closure_id], references: [closure_id])
   closure_id                      Int?
   view_count                      ViewCount[]
+  User                            User?               @relation(fields: [userUser_id], references: [user_id])
+  Faculty                         Faculty?            @relation(fields: [facultyFaculty_id], references: [faculty_id])
+  facultyFaculty_id               Int?
+  StudentSubmission               StudentSubmission[]
 }
 
 model ViewCount {
-  view_count_id Int            @id @default(autoincrement())
+  view_count_id Int   @id @default(autoincrement())
   count         Int
-  event  Event  @relation(fields: [event_id]: references: [event_id])
-  event_id Int
+  event         Event @relation(fields: [event_id], references: [event_id])
+  event_id      Int
 }
 
 model StudentSubmission {
-  submission_id   Int          @id @default(autoincrement())
+  submission_id   Int       @id @default(autoincrement())
   student_id      Int
-  contribution_id Int
   title           String
   content         String
   agreed_to_terms Boolean
-  submittedAt     DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  submittedAt     DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   uploadUrl       String[]
   comments        Comment[]
-  Contribution    Contribution @relation(fields: [contribution_id], references: [contribution_id])
-  student         User         @relation(fields: [student_id], references: [user_id])
+  event           Event?    @relation(fields: [event_id], references: [event_id])
+  event_id        Int?
+  student         User      @relation(fields: [student_id], references: [user_id])
 }
 
 model Comment {
@@ -131,10 +132,9 @@ model GuestFaculty {
 }
 
 model ClosureDate {
-  closure_id    Int            @id @default(autoincrement())
+  closure_id    Int      @id @default(autoincrement())
   entry_closure DateTime
   final_closure DateTime
-  Contribution  Contribution[]
   event         Event[]
 }
 
