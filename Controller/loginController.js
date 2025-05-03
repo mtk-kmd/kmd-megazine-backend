@@ -38,6 +38,35 @@ exports.login = async (req, res) => {
             },
             include: {
                 auth: true,
+                role: true,
+                StudentFaculty: {
+                        include: {
+                            faculty: true
+                        }
+                    },
+                    Faculty: {
+                        include: {
+                            students: {
+                                include: {
+                                    student: {
+                                        select: {
+                                            user_id: true,
+                                            user_name: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            phone: true,
+                                            role_id: true,
+                                            auth_id: true,
+                                            status: true,
+                                            createdAt: true,
+                                            updatedAt: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
             },
         });
 
