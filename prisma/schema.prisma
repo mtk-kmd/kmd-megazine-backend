@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,137 +15,119 @@ model User {
   last_name          String
   email              String              @unique
   phone              String?
-  role               Role?               @relation(fields: [role_id], references: [role_id])
-  role_id            Int?
-  auth               Authentication?     @relation(fields: [auth_id], references: [auth_id])
-  auth_id            Int?
   status             Boolean             @default(true)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
-  Faculty            Faculty?
+  auth_id            Int?
+  role_id            Int?
   faculty_id         Int?
-  StudentFaculty     StudentFaculty?
   student_faculty_id Int?
-  GuestFaculty       GuestFaculty?
   guest_faculty_id   Int?
+  Comment            Comment[]
   Contribution       Contribution[]
   Event              Event[]
-  Comment            Comment[]
+  Faculty            Faculty?
+  GuestFaculty       GuestFaculty?
+  StudentFaculty     StudentFaculty?
   StudentSubmission  StudentSubmission[]
+  auth               Authentication?     @relation(fields: [auth_id], references: [auth_id])
+  role               Role?               @relation(fields: [role_id], references: [role_id])
   browserTracking    browserTracking[]
 }
 
 model Role {
   role_id   Int      @id @default(autoincrement())
   role_name String
-  user      User[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User[]
 }
 
 model Authentication {
   auth_id     Int      @id @default(autoincrement())
   auth_code   Int
   is_verified Boolean  @default(false)
-  user        User[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User[]
 }
 
 model Faculty {
   faculty_id     Int              @id @default(autoincrement())
   name           String           @unique
-  coordinator    User?            @relation(fields: [coordinator_id], references: [user_id])
   coordinator_id Int?             @unique
-  students       StudentFaculty[]
-  guests         GuestFaculty[]
-  contributions  Contribution[]
-  event          Event[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-}
-
-model Contribution {
-  contribution_id                 Int                 @id @default(autoincrement())
-  title                           String // Example: "2025 Computer Science Contribution"
-  description                     String?
-  faculty                         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
-  faculty_id                      Int
-  submissions                     StudentSubmission[]
-  contribution_content_upload_url String[]
-  status                          ContributionStatus  @default(OPEN)
-  allowPublication                Boolean             @default(false)
-  createdAt                       DateTime            @default(now())
-  updatedAt                       DateTime            @updatedAt
-  User                            User?               @relation(fields: [userUser_id], references: [user_id])
-  userUser_id                     Int?
-  closure                         ClosureDate?        @relation(fields: [closure_id], references: [closure_id])
-  closure_id                      Int?
+  Contribution   Contribution[]
+  event          Event[]
+  coordinator    User?            @relation(fields: [coordinator_id], references: [user_id])
+  guests         GuestFaculty[]
+  students       StudentFaculty[]
 }
 
 model Event {
   event_id                        Int                @id @default(autoincrement())
-  title                           String // Example: "2025 Computer Science Event"
+  title                           String
   description                     String?
   contribution_content_upload_url String[]
-  faculty                         Faculty?           @relation(fields: [faculty_id], references: [faculty_id])
-  faculty_id                      Int?
   status                          ContributionStatus @default(OPEN)
   allowPublication                Boolean            @default(false)
   createdAt                       DateTime           @default(now())
   updatedAt                       DateTime           @updatedAt
-  User                            User?              @relation(fields: [userUser_id], references: [user_id])
   userUser_id                     Int?
-  closure                         ClosureDate?       @relation(fields: [closure_id], references: [closure_id])
   closure_id                      Int?
+  faculty_id                      Int?
+  closure                         ClosureDate?       @relation(fields: [closure_id], references: [closure_id])
+  faculty                         Faculty?           @relation(fields: [faculty_id], references: [faculty_id])
+  User                            User?              @relation(fields: [userUser_id], references: [user_id])
 }
 
 model StudentSubmission {
   submission_id   Int          @id @default(autoincrement())
-  student         User         @relation(fields: [student_id], references: [user_id])
   student_id      Int
-  contribution    Contribution @relation(fields: [contribution_id], references: [contribution_id])
   contribution_id Int
   title           String
-  content         String // Article content or MinIO file URL
-  uploadUrl       String[] // Array of file URLs stored in MinIO
+  content         String
   agreed_to_terms Boolean
   submittedAt     DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  uploadUrl       String[]
   comments        Comment[]
+  Contribution    Contribution @relation(fields: [contribution_id], references: [contribution_id])
+  student         User         @relation(fields: [student_id], references: [user_id])
 }
 
 model Comment {
   comment_id    Int               @id @default(autoincrement())
   content       String
-  contributor   User              @relation(fields: [user_id], references: [user_id])
   user_id       Int
-  submission    StudentSubmission @relation(fields: [submission_id], references: [submission_id])
-  submission_id Int
   createdAt     DateTime          @default(now())
+  submission_id Int
+  submission    StudentSubmission @relation(fields: [submission_id], references: [submission_id])
+  contributor   User              @relation(fields: [user_id], references: [user_id])
 }
 
 model StudentFaculty {
   student_faculty_id Int     @id @default(autoincrement())
-  student            User    @relation(fields: [student_id], references: [user_id])
   student_id         Int     @unique
-  faculty            Faculty @relation(fields: [faculty_id], references: [faculty_id])
   faculty_id         Int
+  faculty            Faculty @relation(fields: [faculty_id], references: [faculty_id])
+  student            User    @relation(fields: [student_id], references: [user_id])
 }
 
 model GuestFaculty {
   guest_faculty_id Int     @id @default(autoincrement())
-  guest            User    @relation(fields: [guest_id], references: [user_id])
   guest_id         Int     @unique
-  faculty          Faculty @relation(fields: [faculty_id], references: [faculty_id])
   faculty_id       Int
+  faculty          Faculty @relation(fields: [faculty_id], references: [faculty_id])
+  guest            User    @relation(fields: [guest_id], references: [user_id])
 }
 
 model ClosureDate {
   closure_id    Int            @id @default(autoincrement())
   entry_closure DateTime
   final_closure DateTime
-  contribution  Contribution[]
+  Contribution  Contribution[]
   event         Event[]
 }
 
@@ -167,12 +143,38 @@ model browserTracking {
   request_path    String
   request_method  String
   createdAt       DateTime @default(now())
-  user            User?    @relation(fields: [user_id], references: [user_id])
   user_id         Int?
+  user            User?    @relation(fields: [user_id], references: [user_id])
+}
+
+model Contribution {
+  contribution_id                 Int                 @id @default(autoincrement())
+  title                           String
+  faculty_id                      Int
+  status                          ContributionStatus  @default(OPEN)
+  updatedAt                       DateTime
+  createdAt                       DateTime            @default(now())
+  description                     String?
+  userUser_id                     Int?
+  allowPublication                Boolean             @default(false)
+  contribution_content_upload_url String[]
+  closure_id                      Int?
+  view_count_id                   Int?
+  ClosureDate                     ClosureDate?        @relation(fields: [closure_id], references: [closure_id])
+  Faculty                         Faculty             @relation(fields: [faculty_id], references: [faculty_id])
+  User                            User?               @relation(fields: [userUser_id], references: [user_id])
+  ViewCount                       ViewCount?          @relation(fields: [view_count_id], references: [view_count_id])
+  StudentSubmission               StudentSubmission[]
+}
+
+model ViewCount {
+  view_count_id Int            @id @default(autoincrement())
+  count         Int
+  Contribution  Contribution[]
 }
 
 enum ContributionStatus {
-  OPEN // Contribution is open for student submissions
-  CLOSED // Contribution no longer accepts new submissions
-  FINALIZED // Selected submissions are finalized for publication
+  OPEN
+  CLOSED
+  FINALIZED
 }
