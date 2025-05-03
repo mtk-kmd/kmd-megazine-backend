@@ -125,9 +125,102 @@ exports.createStudentContribution = async (req, res) => {
                             "Name": getOneSubmission.event.User?.first_name
                         }
                     ],
-                    "Subject": "Guest user registered to your faculty",
+                    "Subject": "Student has submitted a contribution",
                     "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.`,
                     "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.</p>`,
+                }
+            ]
+        };
+
+        await mailjet.post("send", { version: 'v3.1' }).request(emailPayload);
+
+        return response(res, submission);
+    } catch (error) {
+        return error_response(res, error);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+exports.updateStudentContribution = async (req, res) => {
+    const { submission_id, event_id, user_id, title, content, agreed_to_terms } = req.body;
+    try {
+        if (!req.files || req.files.length === 0) {
+            return error_response(res, { message: "No files uploaded" });
+        }
+
+        const urls = [];
+        for (const file of req.files) {
+            const fileBuffer = file.buffer;
+            const fileName = file.originalname;
+            const contentType = file.mimetype;
+            const objectName = `${Date.now()}-${fileName}`;
+
+            await minioClient.putObject(bucketName, objectName, fileBuffer, contentType);
+            const url = await minioClient.presignedGetObject(bucketName, objectName);
+            urls.push(url);
+        }
+
+        const submission = await prisma.studentSubmission.update({
+            where: {
+                submission_id: parseInt(submission_id),
+            },
+            data: {
+                event_id: parseInt(event_id),
+                student_id: parseInt(user_id),
+                title: title || "Untitled",
+                content: content || "",
+                uploadUrl: urls,
+                agreed_to_terms: agreed_to_terms === "true" || agreed_to_terms === true,
+            },
+        });
+
+        const getOneSubmission = await prisma.studentSubmission.findUnique({
+            where: {
+                submission_id: submission.submission_id,
+            },
+            include: {
+                event: {
+                    include: {
+                        Faculty: true,
+                        User: true,
+                        closure: true,
+                    }
+                },
+                student: {
+                    select: {
+                        user_id: true,
+                        role: true,
+                        user_name: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone: true,
+                        role_id: true,
+                    }
+                },
+                comments: true,
+            },
+        });
+
+        delete getOneSubmission.event.User?.user_password;
+
+        const emailPayload = {
+            "Messages": [
+                {
+                    "From": {
+                        "Email": "minthukyaw454@gmail.com",
+                        "Name": "A new event submission"
+                    },
+                    "To": [
+                        {
+                            "Email": getOneSubmission.event.User?.email,
+                            "Name": getOneSubmission.event.User?.first_name
+                        }
+                    ],
+                    "Subject": "Student has edited a contribution",
+                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}.`,
+                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}.</p>`,
                 }
             ]
         };
