@@ -39,9 +39,8 @@ router.post('/addGuestToFaculty', facultyController.addGuestToFaculty);
 
 // Contribution Management
 router.get('/getContributions', verifyToken, contributionController.getContribution);
-router.post('/createContribution', verifyToken, contributionController.createContribution);
 router.post('/addCommentToContribution', verifyToken, contributionController.addCommentToContribution);
-router.post('/createStudentSubmission', verifyToken, upload, contributionController.createStudentSubmission); // include minio
+router.post('/createStudentContribution', verifyToken, upload, contributionController.createStudentContribution); // include minio
 router.get('/getStudentSubmissions', contributionController.getStudentSubmission);
 
 // Event Management
