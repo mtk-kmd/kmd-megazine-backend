@@ -48,7 +48,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getDashboardStatsByUser = async (req, res) => {
     const { user_id } = req.query;
-    // try {
+    try {
         const user = await prisma.user.findFirst({
             where: {
                 user_id: parseInt(user_id),
@@ -60,8 +60,6 @@ exports.getDashboardStatsByUser = async (req, res) => {
                 StudentSubmission: true
             }
         });
-
-        console.log(user);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -76,22 +74,63 @@ exports.getDashboardStatsByUser = async (req, res) => {
                 return res.status(404).json({ error: 'No faculty associated with this user' });
             }
 
+            const totalEventsById = await prisma.event.findMany({
+                where: {
+                    userUser_id: user.user_id
+                },
+                select: {
+                    event_id: true,
+                    StudentSubmission: {
+                        select: {
+                            submission_id: true,
+                            submission_status: true,
+                        }
+                    },
+                    _count: {
+                        select: {
+                            StudentSubmission: true
+                        }
+                    }
+                }
+            });
+
+            // Calculate submission status counts
+            const submissionStatusCounts = totalEventsById.reduce((acc, event) => {
+                event.StudentSubmission.forEach(submission => {
+                    acc[submission.submission_status] = (acc[submission.submission_status] || 0) + 1;
+                });
+                return acc;
+            }, {});
+
+            const totalOverallSubmissions = totalEventsById.reduce((total, event) => {
+                return total + event._count.StudentSubmission;
+            }, 0);
+
             const stats = await Promise.all([
                 // Total users count
                 prisma.studentFaculty.count({
                     where: {
                         faculty_id: facultyIds[0]
                     }
-                })
+                }),
+                // Total Events count
+                prisma.event.count({
+                    where: {
+                        userUser_id: user.user_id
+                    }
+                }),
             ]);
 
             res.json({
-                totalUsers: stats[0],
+                totalStudentsInFaculty: stats[0],
+                totalEventsCreatedByUser: stats[1],
+                totalOverallSubmissions: totalOverallSubmissions,
+                submissionStatusCounts: submissionStatusCounts  // This will show counts by status
             });
         }
-    // } catch (error) {
-    //     res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
-    // } finally {
-    //     await prisma.$disconnect();
-    // }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
+    } finally {
+        await prisma.$disconnect();
+    }
 }
