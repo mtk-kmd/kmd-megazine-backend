@@ -108,6 +108,7 @@ exports.getEvent = async (req, res) => {
                     view_count: true,
                     StudentSubmission: {
                         include: {
+                            comments: true,
                             student: {
                                 select: {
                                     user_id: true,
@@ -169,6 +170,7 @@ exports.getEvent = async (req, res) => {
                     view_count: true,
                     StudentSubmission: {
                         include: {
+                            comments: true,
                             student: {
                                 select: {
                                     user_id: true,
