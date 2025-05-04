@@ -105,7 +105,28 @@ exports.getEvent = async (req, res) => {
                     },
                     closure: true,
                     Faculty: true,
-                    view_count: true
+                    view_count: true,
+                    StudentSubmission: {
+                        include: {
+                            student: {
+                                select: {
+                                    user_id: true,
+                                    role: true,
+                                    user_name: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true,
+                                    phone: true,
+                                    role_id: true,
+                                    StudentFaculty: {
+                                        include: {
+                                            faculty: true
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    }
                 },
             });
 
@@ -145,7 +166,28 @@ exports.getEvent = async (req, res) => {
                     },
                     closure: true,
                     Faculty: true,
-                    view_count: true
+                    view_count: true,
+                    StudentSubmission: {
+                        include: {
+                            student: {
+                                select: {
+                                    user_id: true,
+                                    role: true,
+                                    user_name: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true,
+                                    phone: true,
+                                    role_id: true,
+                                    StudentFaculty: {
+                                        include: {
+                                            faculty: true
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    }
                 },
             });
             event.forEach((c) => {
