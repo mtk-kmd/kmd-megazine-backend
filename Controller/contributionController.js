@@ -236,13 +236,23 @@ exports.updateStudentContribution = async (req, res) => {
 }
 
 exports.getStudentContribution = async (req, res) => {
-    const { submission_id } = req.query;
+    const { submission_id, student_id } = req.query;
     try {
-        if (submission_id) {
-            const submission = await prisma.studentSubmission.findUnique({
-                where: {
-                    submission_id: parseInt(submission_id),
-                },
+        if (submission_id || student_id) {
+            const where = {
+                OR: []
+            };
+
+            if (submission_id) {
+                where.OR.push({ submission_id: parseInt(submission_id) });
+            }
+
+            if (student_id) {
+                where.OR.push({ student_id: parseInt(student_id) });
+            }
+
+            const submission = await prisma.studentSubmission.findFirst({
+                where,
                 include: {
                     event: {
                         include: {
@@ -252,10 +262,37 @@ exports.getStudentContribution = async (req, res) => {
                             view_count: true,
                         }
                     },
-                    student: true,
+                    student: {
+                        select: {
+                            user_id: true,
+                            role: true,
+                            user_name: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            phone: true,
+                            role_id: true,
+                            StudentFaculty: {
+                                include: {
+                                    faculty: true
+                                }
+                            },
+                        }
+                    },
                     comments: {
                         include: {
-                            contributor: true,
+                            contributor: {
+                                select: {
+                                    user_id: true,
+                                    role: true,
+                                    user_name: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true,
+                                    phone: true,
+                                    role_id: true,
+                                }
+                            }
                         }
                     }
                 },

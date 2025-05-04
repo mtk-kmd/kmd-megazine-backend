@@ -52,7 +52,7 @@ exports.createEvent = async (req, res) => {
                     }
                 },
                 closure: true,
-                faculty: true,
+                Faculty: true,
             },
         });
 
@@ -105,6 +105,7 @@ exports.getEvent = async (req, res) => {
                     },
                     closure: true,
                     Faculty: true,
+                    view_count: true
                 },
             });
 
@@ -124,7 +125,7 @@ exports.getEvent = async (req, res) => {
             } else {
                 await prisma.viewCount.update({
                     where: {
-                        event: event.event_id,
+                        view_count_id: viewCount.view_count_id,
                     },
                     data: {
                         count: viewCount.count + 1,
@@ -144,6 +145,7 @@ exports.getEvent = async (req, res) => {
                     },
                     closure: true,
                     Faculty: true,
+                    view_count: true
                 },
             });
             event.forEach((c) => {

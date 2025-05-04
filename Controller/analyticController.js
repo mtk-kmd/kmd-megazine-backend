@@ -45,3 +45,53 @@ exports.getDashboardStats = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
     }
 };
+
+exports.getDashboardStatsByUser = async (req, res) => {
+    const { user_id } = req.query;
+    // try {
+        const user = await prisma.user.findFirst({
+            where: {
+                user_id: parseInt(user_id),
+            },
+            include: {
+                Event: true,
+                role: true,
+                StudentFaculty: true,
+                StudentSubmission: true
+            }
+        });
+
+        console.log(user);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.role_id === 3) {
+            const facultyIds = user.Event
+                .map(event => event.faculty_id)
+                .filter(id => id !== null);
+
+            if (facultyIds.length === 0) {
+                return res.status(404).json({ error: 'No faculty associated with this user' });
+            }
+
+            const stats = await Promise.all([
+                // Total users count
+                prisma.studentFaculty.count({
+                    where: {
+                        faculty_id: facultyIds[0]
+                    }
+                })
+            ]);
+
+            res.json({
+                totalUsers: stats[0],
+            });
+        }
+    // } catch (error) {
+    //     res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
+    // } finally {
+    //     await prisma.$disconnect();
+    // }
+}

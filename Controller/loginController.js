@@ -7,26 +7,60 @@ exports.login = async (req, res) => {
     const { user_name, password, is_guest_user, email } = req.body;
 
     try {
-        if (is_guest_user) {
-            const guestUser = await prisma.guestUser.findFirst({
-                where: { email },
-                include: {
-                    auth: true,
-                },
-            });
+        // if (is_guest_user) {
+        //     const guestUser = await prisma.guestUser.findFirst({
+        //         where: {
+        //             OR: [
+        //                 { user_name },
+        //                 { email },
+        //             ],
+        //         },
+        //         include: {
+        //             auth: true,
+        //             role: true,
+        //             GuestFaculty: {
+        //                     include: {
+        //                         faculty: true
+        //                     }
+        //                 },
+        //             Faculty: {
+        //                 include: {
+        //                     students: {
+        //                         include: {
+        //                             student: {
+        //                                 select: {
+        //                                     user_id: true,
+        //                                     user_name: true,
+        //                                     first_name: true,
+        //                                     last_name: true,
+        //                                     email: true,
+        //                                     phone: true,
+        //                                     role_id: true,
+        //                                     auth_id: true,
+        //                                     status: true,
+        //                                     createdAt: true,
+        //                                     updatedAt: true
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         },
+        //     });
 
-            const token = jwt.sign(
-                { id: guestUser.user_id, username: guestUser.email, role: guestUser.role },
-                'secret_key',
-                { expiresIn: '30d' }
-            );
+        //     const token = jwt.sign(
+        //         { id: guestUser.user_id, username: guestUser.email, role: guestUser.role },
+        //         'secret_key',
+        //         { expiresIn: '30d' }
+        //     );
 
-            return res.status(200).json({
-                message: "User authenticated successfully",
-                token,
-                result: guestUser,
-            });
-        }
+        //     return res.status(200).json({
+        //         message: "User authenticated successfully",
+        //         token,
+        //         result: guestUser,
+        //     });
+        // }
 
         // allow to be either user_name or email
         const user = await prisma.user.findFirst({
@@ -40,33 +74,60 @@ exports.login = async (req, res) => {
                 auth: true,
                 role: true,
                 StudentFaculty: {
-                        include: {
-                            faculty: true
-                        }
-                    },
-                    Faculty: {
-                        include: {
-                            students: {
-                                include: {
-                                    student: {
-                                        select: {
-                                            user_id: true,
-                                            user_name: true,
-                                            first_name: true,
-                                            last_name: true,
-                                            email: true,
-                                            phone: true,
-                                            role_id: true,
-                                            auth_id: true,
-                                            status: true,
-                                            createdAt: true,
-                                            updatedAt: true
+                    include: {
+                        faculty: true
+                    }
+                },
+                GuestFaculty: {
+                    include: {
+                        faculty: {
+                            include: {
+                                guests: {
+                                    include: {
+                                        guest: {
+                                            select: {
+                                                user_id: true,
+                                                user_name: true,
+                                                first_name: true,
+                                                last_name: true,
+                                                email: true,
+                                                phone: true,
+                                                role_id: true,
+                                                auth_id: true,
+                                                status: true,
+                                                createdAt: true,
+                                                updatedAt: true
+                                            }
                                         }
+                                    }
+                                }
+                            }
+                        },
+                    }
+                },
+                Faculty: {
+                    include: {
+                        students: {
+                            include: {
+                                student: {
+                                    select: {
+                                        user_id: true,
+                                        user_name: true,
+                                        first_name: true,
+                                        last_name: true,
+                                        email: true,
+                                        phone: true,
+                                        role_id: true,
+                                        auth_id: true,
+                                        status: true,
+                                        createdAt: true,
+                                        updatedAt: true
                                     }
                                 }
                             }
                         }
                     }
+                }
             },
         });
 

@@ -52,6 +52,7 @@ router.delete('/deleteEvent', verifyToken, eventController.deleteEvent);
 
 // Analytics Management
 router.get('/dashboard-stats', verifyToken, analyticsController.getDashboardStats);
+router.get('/getDashboardStatsByUser', verifyToken, analyticsController.getDashboardStatsByUser);
 
 // Browser Tracking Management
 router.get('/trackBrowser', browserController.trackBrowser);
