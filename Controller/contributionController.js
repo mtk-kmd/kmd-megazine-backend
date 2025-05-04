@@ -143,7 +143,7 @@ exports.createStudentContribution = async (req, res) => {
 }
 
 exports.updateStudentContribution = async (req, res) => {
-    const { submission_id, event_id, user_id, title, content, agreed_to_terms } = req.body;
+    const { submission_id, event_id, user_id, title, content, agreed_to_terms, submission_status } = req.body;
     try {
         if (!req.files || req.files.length === 0) {
             return error_response(res, { message: "No files uploaded" });
@@ -172,6 +172,7 @@ exports.updateStudentContribution = async (req, res) => {
                 content: content || "",
                 uploadUrl: urls,
                 agreed_to_terms: agreed_to_terms === "true" || agreed_to_terms === true,
+                submission_status: submission_status,
             },
         });
 
