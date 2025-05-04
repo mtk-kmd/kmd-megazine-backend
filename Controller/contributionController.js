@@ -126,8 +126,8 @@ exports.createStudentContribution = async (req, res) => {
                         }
                     ],
                     "Subject": "Student has submitted a contribution",
-                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.`,
-                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}.</p>`,
+                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}. Please review the submission within 14 days.`,
+                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has submitted event ${getOneSubmission.event.title}. Please review the submission within 14 days.</p>`,
                 }
             ]
         };
@@ -220,8 +220,8 @@ exports.updateStudentContribution = async (req, res) => {
                         }
                     ],
                     "Subject": "Student has edited a contribution",
-                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}.`,
-                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}.</p>`,
+                    "TextPart": `Dear ${getOneSubmission.event.User?.first_name}, student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}. Please review the submission within 14 days.`,
+                    "HTMLPart": `<h3>Dear ${getOneSubmission.event.User?.first_name},</h3><br><p>student name ${getOneSubmission.student.first_name} ${getOneSubmission.student.last_name} has edited event ${getOneSubmission.event.title}. Please review the submission within 14 days.</p>`,
                 }
             ]
         };

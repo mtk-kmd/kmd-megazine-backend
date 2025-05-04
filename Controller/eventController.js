@@ -108,20 +108,23 @@ exports.getEvent = async (req, res) => {
                     view_count: true,
                     StudentSubmission: {
                         include: {
-                            comments: true,
-                            student: {
-                                select: {
-                                    user_id: true,
-                                    role: true,
-                                    user_name: true,
-                                    first_name: true,
-                                    last_name: true,
-                                    email: true,
-                                    phone: true,
-                                    role_id: true,
-                                    StudentFaculty: {
-                                        include: {
-                                            faculty: true
+                            comments: {
+                                include: {
+                                    contributor: {
+                                        select: {
+                                            user_id: true,
+                                            role: true,
+                                            user_name: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            phone: true,
+                                            role_id: true,
+                                            StudentFaculty: {
+                                                include: {
+                                                    faculty: true
+                                                }
+                                            },
                                         }
                                     },
                                 }
@@ -170,20 +173,23 @@ exports.getEvent = async (req, res) => {
                     view_count: true,
                     StudentSubmission: {
                         include: {
-                            comments: true,
-                            student: {
-                                select: {
-                                    user_id: true,
-                                    role: true,
-                                    user_name: true,
-                                    first_name: true,
-                                    last_name: true,
-                                    email: true,
-                                    phone: true,
-                                    role_id: true,
-                                    StudentFaculty: {
-                                        include: {
-                                            faculty: true
+                            comments: {
+                                include: {
+                                    contributor: {
+                                        select: {
+                                            user_id: true,
+                                            role: true,
+                                            user_name: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            phone: true,
+                                            role_id: true,
+                                            StudentFaculty: {
+                                                include: {
+                                                    faculty: true
+                                                }
+                                            },
                                         }
                                     },
                                 }
